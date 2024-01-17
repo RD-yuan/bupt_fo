@@ -38,19 +38,19 @@ def order(fo_data):
 #进行一个简单的食谱匹配，根据
 def analyze_recipes(fo_data,body_data):
     recipes={}
-    recipes["breakfast"]=[]
-    recipes["lunch"]=[]
-    recipes["dinner"]=[]
-    recipes["addition"]=[]
+    recipes["breakfast"]={}
+    recipes["lunch"]={}
+    recipes["dinner"]={}
+    recipes["addition"]={}
 
     ordered_fodata=order(fo_data)
 
-    #1,2,3
+    #早餐1,2,3
     bkf_1=random.choice(ordered_fodata["奶类及制品"])
     bkf_2=random.choice(ordered_fodata["蛋类、肉类及制品"])
     bkf_3=random.choice(ordered_fodata["蔬果和菌藻"])
 
-    #4,3,1,2
+    #午餐4,3,1,2
     lc_1=random.choice(ordered_fodata["蛋类、肉类及制品"])
     lc_2=random.choice(ordered_fodata["饮料"])
     lc_3=random.choice(ordered_fodata["谷薯芋、杂豆、主食"])
@@ -59,7 +59,7 @@ def analyze_recipes(fo_data,body_data):
         lc_4_key=random.choice(list(ordered_fodata.keys()))
     lc_4=random.choice(ordered_fodata[lc_4_key])
     
-    #4,3,1,2
+    #晚餐4,3,1,2
     dn_1=random.choice(ordered_fodata["蛋类、肉类及制品"])
     dn_2=random.choice(ordered_fodata["饮料"])
     dn_3=random.choice(ordered_fodata["谷薯芋、杂豆、主食"])
@@ -68,9 +68,11 @@ def analyze_recipes(fo_data,body_data):
         dn_4_key=random.choice(list(ordered_fodata.keys()))
     dn_4=random.choice(ordered_fodata[dn_4_key])
     
+    #加餐
     ad_1=random.choice(ordered_fodata["零食、点心、冷饮"])
 
     #print(ordered_fodata.keys())
+    #计算碳蛋脂日摄入量
     if body_data[2]==-2:
         #肥胖人群——低碳脂食谱
         carbon=body_data[1]*1.7
@@ -109,24 +111,57 @@ def analyze_recipes(fo_data,body_data):
     ad_f=fat*0.10
 
     #针对不同食物的数据设定食谱含量
+    bft_cpf=[[bft_c*0.4,bft_p*0.4,bft_f*0.4],
+             [bft_c*0.4,bft_p*0.4,bft_f*0.4],
+             [bft_c*0.3,bft_p*0.3,bft_f*0.3],]
 
-    recipes["breakfast"].append(bkf_1[0])
-    recipes["breakfast"].append(bkf_2[0])
-    recipes["breakfast"].append(bkf_3[0])
-
-    recipes["lunch"].append(lc_1[0])
-    recipes["lunch"].append(lc_2[0])
-    recipes["lunch"].append(lc_3[0])
-    recipes["lunch"].append(lc_4[0])
-
-    recipes["dinner"].append(dn_1[0])
-    recipes["dinner"].append(dn_2[0])
-    recipes["dinner"].append(dn_3[0])
-    recipes["dinner"].append(dn_4[0])
-
-    recipes["addition"].append(ad_1[0])
+    lc_cpf=[[lc_c*0.2,lc_p*0.2,lc_f*0.2],
+             [lc_c*0.1,lc_p*0.1,lc_f*0.1],
+             [lc_c*0.4,lc_p*0.4,lc_f*0.4],
+             [lc_c*0.3,lc_p*0.3,lc_f*0.3],]
+    
+    dn_cpf=[[dn_c*0.2,dn_p*0.2,dn_f*0.2],
+             [dn_c*0.1,dn_p*0.1,dn_f*0.1],
+             [dn_c*0.4,dn_p*0.4,dn_f*0.4],
+             [dn_c*0.3,dn_p*0.3,dn_f*0.3],]
+    
 
 
+    #仅计算碳水和蛋白质
+    recipes["breakfast"][bkf_1[0]]=min(bft_cpf[0][0]/float(bkf_1[3]),bft_cpf[0][1]/float(bkf_1[4]))
+    if float(bkf_2[3])!=0:
+        recipes["breakfast"][bkf_2[0]]=min(bft_cpf[1][0]/float(bkf_2[3]),bft_cpf[1][1]/float(bkf_2[4]))
+    else:
+        recipes["breakfast"][bkf_2[0]]=bft_cpf[1][1]/float(bkf_2[4])
+    recipes["breakfast"][bkf_3[0]]=min(bft_cpf[2][0]/float(bkf_3[3]),bft_cpf[2][1]/float(bkf_3[4]))
+
+    if float(lc_1[3])!=0:
+        recipes["lunch"][lc_1[0]]=min(lc_cpf[0][0]/float(lc_1[3]),lc_cpf[0][1]/float(lc_1[4]))
+    else:
+        recipes["lunch"][lc_1[0]]=lc_cpf[0][1]/float(lc_1[4])
+
+    if float(lc_2[3])!=0 and float(lc_2[4])!=0:
+        recipes["lunch"][lc_2[0]]=min(lc_cpf[1][0]/float(lc_2[3]),lc_cpf[1][1]/float(lc_2[4]))
+    else:
+        recipes["lunch"][lc_2[0]]="适量"
+    recipes["lunch"][lc_3[0]]=min(lc_cpf[2][0]/float(lc_3[3]),lc_cpf[2][1]/float(lc_3[4]))
+    recipes["lunch"][lc_4[0]]=min(lc_cpf[3][0]/float(lc_4[3]),lc_cpf[3][1]/float(lc_4[4]))
+
+    if float(dn_1[3])!=0:
+        recipes["dinner"][dn_1[0]]=min(dn_cpf[0][0]/float(dn_1[3]),dn_cpf[0][1]/float(dn_1[4]))
+    else:
+        recipes["dinner"][dn_1[0]]=dn_cpf[0][1]/float(dn_1[4])
+    
+    if float(dn_2[3])!=0 and float(dn_2[4])!=0:
+        recipes["dinner"][dn_2[0]]=min(dn_cpf[1][0]/float(dn_2[3]),dn_cpf[1][1]/float(dn_2[4]))
+    else:
+        recipes["dinner"][dn_2[0]]="适量"
+    recipes["dinner"][dn_3[0]]=min(dn_cpf[2][0]/float(dn_3[3]),dn_cpf[2][1]/float(dn_3[4]))
+    recipes["dinner"][dn_4[0]]=min(dn_cpf[3][0]/float(dn_4[3]),dn_cpf[3][1]/float(dn_4[4]))
+    if float(ad_1[3])!=0 and float(ad_1[4])!=0:
+        recipes["addition"][ad_1[0]]=min(ad_c/float(ad_1[3]),ad_p/float(ad_1[4]))
+    else:
+        recipes["addition"][ad_1[0]]="适量"
     return recipes
 
 def make_recipes(fo_data):
@@ -135,8 +170,11 @@ def make_recipes(fo_data):
     print("为您定制菜谱如下：")
     for key in recipes.keys():
         print(f"{key}",end="：\t")
-        for item in recipes[key]:
-            print(item,end="\t")
+        for food in recipes[key].keys():
+            if(recipes[key][food]!="适量"):
+                print(f"{food}：建议含量{recipes[key][food]*100:.2f}g",end="\n")
+            else:
+                print(f"{food}：适量",end="\n")
         print("\n")
     satisfy=input("您对结果是否满意(Y/N)：")
     if(satisfy=="Y"):
@@ -147,10 +185,14 @@ def make_recipes(fo_data):
             recipes=analyze_recipes(fo_data,body_data)
             for key in recipes.keys():
                 print(f"{key}",end="：\t")
-                for item in recipes[key]:
-                    print(item,end="\t")
+                for food in recipes[key].keys():
+                    if(recipes[key][food]!="适量"):
+                        print(f"{food}：建议含量{recipes[key][food]*100:.2f}g",end="\n")
+                    else:
+                        print(f"{food}：适量",end="\n")
                 print("\n")
             satisfy=input("您对结果是否满意(Y/N)：")
+        print("祝您饮食愉快！")
     else:
         print("输入错误，请重启")
 
